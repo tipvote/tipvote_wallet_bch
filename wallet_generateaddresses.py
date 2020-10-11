@@ -10,7 +10,7 @@ from app.models import BchWalletAddresses
 def generate_addresses():
 
     # query amount addresses that are not uses
-    get_available_addresses = BchWalletAddresses.query\
+    get_available_addresses = db.session.query(BchWalletAddresses)\
         .filter(BchWalletAddresses.status == 0)\
         .count()
 
@@ -24,14 +24,14 @@ def generate_addresses():
             newwalletaddress = callforaddress()
 
             # if error isnt present
-            if newwalletaddress["error"] is not None:
+            if newwalletaddress["result"].startswith('bitcoincash'):
 
                 # get the new address
-                the_address = newwalletaddress["address"]
+                the_address = newwalletaddress["result"]
 
                 # add to db addresses
                 walletadd = BchWalletAddresses(
-                    btcaddress=the_address,
+                    bchaddress=the_address,
                     status=0,
                      )
 
@@ -39,7 +39,7 @@ def generate_addresses():
 
         db.session.commit()
     else:
-        print(f"We have {get_available_addresses} addresses avialable still.  No need to run")
+        print(f"We have {get_available_addresses} addresses available still.  No need to run")
 
 
 def callforaddress():
@@ -62,12 +62,9 @@ def callforaddress():
         headers=headers,
     )
 
-    # print response
-    print(response.url)
-
     # the response in json format
     response_json = response.json()
-
+    print(response_json)
     return response_json
 
 

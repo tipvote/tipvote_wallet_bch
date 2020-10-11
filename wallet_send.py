@@ -80,11 +80,11 @@ def sendcoin(user_id, sendto, amount, comment):
     timestamp = datetime.utcnow()
 
     # get the fee from db
-    getwallet = BchWalletFee.query.filter_by(id=1).first()
+    getwallet = db.session.query(BchWalletFee).filter_by(id=1).first()
     walletfee = getwallet.btc
 
     # get the users wall
-    userswallet = BchWallet.query.filter_by(user_id=user_id).first()
+    userswallet = db.session.query(BchWallet).filter_by(user_id=user_id).first()
 
     # proceed to see if balances check
     curbal = floating_decimals(userswallet.currentbalance, 8)
@@ -129,7 +129,7 @@ def sendcoin(user_id, sendto, amount, comment):
             address='',
             fee=walletfee,
             created=timestamp,
-            commentbtc=comment_str,
+            commentbch=comment_str,
             amount=amount,
             orderid=0,
             balance=curbal,
@@ -149,7 +149,7 @@ def mainquery():
     """
     # main query
     """
-    work = BchWalletWork.query \
+    work = db.session.query(BchWalletWork) \
         .filter(BchWalletWork.type == 2) \
         .order_by(BchWalletWork.created.desc()) \
         .all()
@@ -164,7 +164,6 @@ def mainquery():
                 f.type = 0
 
         db.session.commit()
-
     else:
         print("no wallet work")
 

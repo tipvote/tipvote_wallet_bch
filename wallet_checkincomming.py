@@ -33,7 +33,9 @@ def addtounconfirmed(amount, user_id, txid):
     """
 
     # get unconfirmed transactions
-    unconfirmedtable = BchUnconfirmed.query.filter_by(user_id=user_id).first()
+    unconfirmedtable = db.session.query(BchUnconfirmed)\
+        .filter_by(user_id=user_id)\
+        .first()
 
     # put to decimal
     decamount = floating_decimals(amount, 8)
@@ -89,7 +91,9 @@ def removeunconfirmed(user_id, txid):
     """
 
     # get unconfirmed in database
-    unconfirmeddelete = BchUnconfirmed.query.filter_by(user_id=user_id).first()
+    unconfirmeddelete = db.session.query(BchUnconfirmed)\
+        .filter_by(user_id=user_id)\
+        .first()
 
     # find matching txid in table
     if unconfirmeddelete.txid1 == txid:
@@ -125,7 +129,9 @@ def getbalanceunconfirmed(user_id):
     """
     this function removes the amount from unconfirmed
     """
-    unconfirmeddelete = BchUnconfirmed.query.filter_by(user_id=user_id).first()
+    unconfirmeddelete = db.session.query(BchUnconfirmed)\
+        .filter_by(user_id=user_id)\
+        .first()
     a = Decimal(unconfirmeddelete.unconfirmed1)
     b = Decimal(unconfirmeddelete.unconfirmed2)
     c = Decimal(unconfirmeddelete.unconfirmed3)
@@ -134,7 +140,9 @@ def getbalanceunconfirmed(user_id):
 
     total = a + b + c + d + e
 
-    wallet = BchWallet.query.filter_by(user_id=user_id).first()
+    wallet = db.session.query(BchWallet)\
+        .filter_by(user_id=user_id)\
+        .first()
     totalchopped = floating_decimals(total, 8)
     wallet.unconfirmed = totalchopped
     db.session.add(wallet)
@@ -144,15 +152,17 @@ def orphan(txid, amount2, address):
     """
     this function is if they cant find a matching address
     """
-    getorphan = BchTransOrphan.query.filter_by(txid=txid).first()
+    getorphan = db.session.query(BchTransOrphan)\
+        .filter_by(txid=txid)\
+        .first()
     if getorphan:
         pass
     else:
         # orphan transaction..put in background.
         # they prolly sent to old address
         trans = BchTransOrphan(
-            btc=amount2,
-            btcaddress=address,
+            bch=amount2,
+            bchaddress=address,
             txid=txid,
         )
         db.session.add(trans)
@@ -180,7 +190,7 @@ def newincomming(userwallet, amount2, txid, howmanyconfs):
         blockhash='',
         timerecieved=0,
         timeoft=0,
-        commentbtc='',
+        commentbch='',
         otheraccount=0,
         balance=shortaddcurrent,
         fee=0,
@@ -303,7 +313,7 @@ def addcoin():
         howmanyconfs = int(confirmations)
 
         # find the wallet that matches the address
-        userwallets = BchWallet.query \
+        userwallets = db.session.query(BchWallet) \
             .filter(or_(BchWallet.address1 == address,
                         BchWallet.address2 == address,
                         BchWallet.address3 == address
@@ -315,7 +325,7 @@ def addcoin():
         if userwallets:
 
             # get the transactions
-            transactions = TransactionsBch.query\
+            transactions = db.session.query(TransactionsBch)\
                 .filter(TransactionsBch.txid == txid)\
                 .first()
 
@@ -350,7 +360,7 @@ def getincommingcoin():
         "params":
             {
              "minconf": 0,
-             "maxconf": 25,
+             "maxconf": 100,
              }
     }
 

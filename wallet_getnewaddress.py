@@ -13,16 +13,20 @@ def getnewaddress(user_id):
     :param user_id:
     :return:
     """
-    userswallet = db.session.query(BchWallet).filter_by(user_id=user_id).first()
-    x = db.session.query(BchWalletAddresses).filter(BchWalletAddresses.status == 0).first()
+    userswallet = db.session.query(BchWallet) \
+        .filter_by(user_id=user_id) \
+        .first()
+    x = db.session.query(BchWalletAddresses) \
+        .filter(BchWalletAddresses.status == 0) \
+        .first()
 
     # Test to see if user doesnt have any current incomming transactions..get new one if not
-    incdeposit = db.session.query(TransactionsBch)
-    incdeposit = incdeposit.filter(TransactionsBch.category == 3,
-                                   TransactionsBch.confirmed == 0,
-                                   TransactionsBch.user_id == user_id,
-                                   )
-    incdeposit = incdeposit.first()
+    incdeposit = db.session.query(TransactionsBch) \
+        .filter(TransactionsBch.category == 3,
+                TransactionsBch.confirmed == 0,
+                TransactionsBch.user_id == user_id,
+                ) \
+        .first()
     if incdeposit is None:
         # status 0 = not used
         # status 1 = current main

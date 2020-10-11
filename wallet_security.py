@@ -5,7 +5,9 @@ from app.models import BchWallet
 
 
 def checkbalance(user_id, amount):
-    userwallet = BchWallet.query.filter(BchWallet.user_id == user_id).first()
+    userwallet = db.session.query(BchWallet)\
+        .filter(BchWallet.user_id == user_id)\
+        .first()
     curbal = Decimal(userwallet.currentbalance) + Decimal(amount)
     amounttocheck = Decimal(amount)
 
